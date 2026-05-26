@@ -1,0 +1,94 @@
+// CIE 9618 Pseudocode - Buggy Test File
+// This file contains various syntax errors for testing
+
+// ERROR 1: Missing THEN keyword
+IF x > 5
+  OUTPUT "Missing THEN"
+ENDIF
+
+// ERROR 2: Using undeclared variable
+y <- 10
+z <- y + 5
+
+// ERROR 3: Invalid data type
+DECLARE myVar : FLOAT
+
+// ERROR 4: Unterminated string literal
+OUTPUT "This string has no closing quote
+
+// ERROR 5: Missing ENDIF
+IF x > 0 THEN
+  OUTPUT "No ENDIF here"
+
+// ERROR 6: Invalid character in code
+x <- 10 @ 5
+
+// ERROR 7: Multiple decimal points in number
+y <- 3.14.159
+
+// ERROR 8: Wrong assignment operator (using = instead of <-)
+x = 10
+
+// ERROR 9: Missing ENDWHILE
+WHILE x > 0 DO
+  x <- x - 1
+
+// ERROR 10: CHAR with multiple characters
+DECLARE ch : CHAR
+ch <- 'ABC'
+
+// ERROR 11: Missing colon in declaration
+DECLARE name STRING
+
+// ERROR 12: Invalid array syntax (missing OF)
+DECLARE arr : ARRAY[1:10] INTEGER
+
+// ERROR 13: Mismatched loop variable in NEXT
+FOR i <- 1 TO 10
+  OUTPUT i
+NEXT j
+
+// ERROR 14: Missing STEP value after STEP keyword
+FOR k <- 1 TO 10 STEP
+  OUTPUT k
+NEXT k
+
+// ERROR 15: Using wrong comparison operator
+IF x == 5 THEN
+  OUTPUT "Wrong operator"
+ENDIF
+
+// ERROR 16: Missing UNTIL in REPEAT loop
+REPEAT
+  INPUT x
+
+// ERROR 17: Unmatched parentheses
+x <- (5 + 3 * 2
+
+// ERROR 18: Invalid keyword spelling
+DECLAIRE num : INTEGER
+
+// ERROR 19: Missing RETURNS in function
+FUNCTION Add(a : INTEGER, b : INTEGER)
+  RETURN a + b
+ENDFUNCTION
+
+// ERROR 20: Using undefined operator
+x <- 5 ** 2
+
+// ERROR 21: Missing array index
+numbers <- 42
+
+// ERROR 22: Wrong quote type for string
+name <- 'This should be double quotes'
+
+// ERROR 23: Missing ENDCASE
+CASE OF x
+  1 : OUTPUT "One"
+  2 : OUTPUT "Two"
+
+// ERROR 24: Invalid boolean value
+isValid <- Yes
+
+// ERROR 25: Mixing operators incorrectly
+result <- 5 + * 3

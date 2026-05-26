@@ -1,0 +1,34 @@
+// Basic CIE 9618 Pseudocode Examples
+// Simple program demonstrating basic syntax
+
+// Variable declarations
+DECLARE x : INTEGER
+DECLARE y : REAL
+DECLARE name : STRING
+
+// Assignments
+x <- 10
+y <- 3.14
+name <- "Alice"
+
+// Conditional
+IF x > 5 THEN
+  OUTPUT "x is greater than 5"
+ELSE
+  OUTPUT "x is 5 or less"
+ENDIF
+
+// FOR loop
+FOR i <- 1 TO 5
+  OUTPUT i
+NEXT i
+
+// WHILE loop
+WHILE x > 0 DO
+  OUTPUT x
+  x <- x - 1
+ENDWHILE
+
+// Input and Output
+INPUT name
+OUTPUT "Hello, ", name

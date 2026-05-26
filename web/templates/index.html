@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Checker{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<script src="{{ url_for('static', filename='pseudocode.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>9618 Pseudocode Checker</h1>
+  <p>Paste or type Cambridge A-Level pseudocode, then click <strong>Check</strong> to validate syntax and semantics. Spelling and UI improved.</p>
+</section>
+
+<div class="toolbar">
+  <label for="example-select">Load example:</label>
+  <select id="example-select">
+    <option value="">— choose —</option>
+  </select>
+  <label for="live-check" style="margin-left:0.5rem;">
+    <input type="checkbox" id="live-check"> Live check
+  </label>
+  <button type="button" id="btn-check" class="btn primary">Check</button>
+  <button type="button" id="btn-clear" class="btn">Clear</button>
+</div>
+
+<div class="workspace">
+  <div class="editor-panel">
+    <div class="panel-header">Pseudocode</div>
+    <textarea id="source" spellcheck="false" placeholder="// DECLARE x : INTEGER&#10;// x <- 10&#10;// OUTPUT x"></textarea>
+  </div>
+  <div class="results-panel">
+    <div class="panel-header">
+      <span>Results</span>
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="errors">Errors</button>
+        <button type="button" class="tab" data-tab="python">Python preview</button>
+      </div>
+    </div>
+    <div id="status-banner" class="status-banner hidden"></div>
+    <div id="tab-errors" class="tab-panel active">
+      <ul id="issue-list" class="issue-list"></ul>
+      <p id="no-issues" class="muted hidden">No issues. Your pseudocode looks valid.</p>
+    </div>
+    <div id="tab-python" class="tab-panel">
+      <pre id="python-preview" class="python-preview muted">Run Check to generate a Python preview.</pre>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

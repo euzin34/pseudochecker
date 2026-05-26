@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Syntax reference{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Syntax reference</h1>
+  <p>Quick reference for CIE 9618 pseudocode (from project docs).</p>
+</section>
+<div class="reference-body">
+  {% if reference_content %}
+  <pre class="reference-pre">{{ reference_content }}</pre>
+  {% else %}
+  <p class="muted">Reference file not found. See docs/QUICK_REFERENCE.md in the project.</p>
+  {% endif %}
+</div>
+{% endblock %}
