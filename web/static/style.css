@@ -3,7 +3,7 @@
   --surface: #1a2332;
   --border: #2d3a4f;
   --text: #e7ecf3;
-  --muted: #8b9cb3;
+  --muted: #9fb0c8;
   --accent: #3b82f6;
   --success: #22c55e;
   --error: #ef4444;
@@ -125,10 +125,28 @@ main.container {
   border-color: var(--accent);
 }
 
+.btn {
+  transition: box-shadow 150ms ease, transform 120ms ease, border-color 120ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(59,130,246,0.18);
+  outline-offset: 2px;
+}
+
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.06);
+}
+
+.btn.primary:hover {
+  box-shadow: 0 10px 30px rgba(59,130,246,0.09);
 }
 
 .workspace {

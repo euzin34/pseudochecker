@@ -1,0 +1,13 @@
+// Buggy example: syntax errors
+// Missing ENDIF and incorrect declaration punctuation
+
+DECLARE x INTEGER
+x <- 5
+IF x > 3 THEN
+  OUTPUT "x is greater than 3"
+// Missing ENDIF here
+
+// Wrong keyword usage
+FOR i = 1 TO 5
+  OUTPUT i
+NEXT

@@ -1,0 +1,12 @@
+// Buggy example: logical error
+// Infinite loop due to incorrect loop condition
+
+DECLARE x : INTEGER
+x <- 0
+WHILE x >= 0 DO
+  OUTPUT x
+  // Intended to decrement but accidentally increments
+  x <- x + 1
+ENDWHILE
+
+// Suggest fixing to x <- x - 1 or change condition

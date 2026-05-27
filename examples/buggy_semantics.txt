@@ -1,0 +1,18 @@
+// Buggy example: semantic issues
+// Off-by-one in array indexing and type mismatch
+
+DECLARE n : INTEGER
+DECLARE arr : ARRAY[1:5] OF INTEGER
+
+n <- 5
+FOR i <- 1 TO n
+  arr[i] <- i * 2
+NEXT i
+
+// Accessing out of range
+OUTPUT arr[6]
+
+// Type mismatch
+DECLARE name : STRING
+name <- 12345
+OUTPUT name

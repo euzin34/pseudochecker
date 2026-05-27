@@ -12,7 +12,7 @@
 {% block content %}
 <section class="hero">
   <h1>9618 Pseudocode Checker</h1>
-  <p>Paste or type Cambridge A-Level pseudocode, then click <strong>Check</strong> to validate syntax and semantics. Spelling and UI improved.</p>
+  <p>Paste or type Cambridge A‑Level pseudocode, then click <strong>Check</strong> to validate syntax and semantics.</p>
 </section>
 
 <div class="toolbar">
@@ -23,14 +23,14 @@
   <label for="live-check" style="margin-left:0.5rem;">
     <input type="checkbox" id="live-check"> Live check
   </label>
-  <button type="button" id="btn-check" class="btn primary">Check</button>
-  <button type="button" id="btn-clear" class="btn">Clear</button>
+  <button type="button" id="btn-check" class="btn primary" aria-label="Run syntax check">Check</button>
+  <button type="button" id="btn-clear" class="btn" aria-label="Clear editor">Clear</button>
 </div>
 
 <div class="workspace">
   <div class="editor-panel">
     <div class="panel-header">Pseudocode</div>
-    <textarea id="source" spellcheck="false" placeholder="// DECLARE x : INTEGER&#10;// x <- 10&#10;// OUTPUT x"></textarea>
+    <textarea id="source" spellcheck="false" aria-label="Pseudocode editor" placeholder="// DECLARE x : INTEGER&#10;// x <- 10&#10;// OUTPUT x"></textarea>
   </div>
   <div class="results-panel">
     <div class="panel-header">
@@ -40,7 +40,7 @@
         <button type="button" class="tab" data-tab="python">Python preview</button>
       </div>
     </div>
-    <div id="status-banner" class="status-banner hidden"></div>
+    <div id="status-banner" class="status-banner hidden" role="status" aria-live="polite"></div>
     <div id="tab-errors" class="tab-panel active">
       <ul id="issue-list" class="issue-list"></ul>
       <p id="no-issues" class="muted hidden">No issues. Your pseudocode looks valid.</p>
