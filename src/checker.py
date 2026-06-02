@@ -22,6 +22,7 @@ class CheckResult:
     warnings: List[Dict[str, Any]] = field(default_factory=list)
     stats: Dict[str, Any] = field(default_factory=dict)
     python_preview: Optional[str] = None
+    observations: List[Dict[str, Any]] = field(default_factory=list)
     stage: str = "complete"
     message: str = ""
 
@@ -32,6 +33,7 @@ class CheckResult:
             "warnings": self.warnings,
             "stats": self.stats,
             "python_preview": self.python_preview,
+            "observations": self.observations,
             "stage": self.stage,
             "message": self.message,
         }
@@ -119,6 +121,8 @@ class PseudocodeChecker:
                 except Exception as exc:
                     python_preview = f"# Preview unavailable: {exc}"
 
+            observations = getattr(analyzer, 'observations', [])
+
             if has_blocking:
                 return CheckResult(
                     ok=False,
@@ -126,6 +130,7 @@ class PseudocodeChecker:
                     warnings=warnings,
                     stats=stats,
                     python_preview=python_preview,
+                    observations=observations,
                     stage="semantic" if errors else "warnings",
                     message="Validation failed.",
                 )
@@ -140,6 +145,7 @@ class PseudocodeChecker:
                 warnings=warnings,
                 stats=stats,
                 python_preview=python_preview,
+                observations=observations,
                 stage="complete",
                 message=msg,
             )

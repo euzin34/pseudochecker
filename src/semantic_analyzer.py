@@ -92,6 +92,9 @@ class SemanticAnalyzer:
         
         # Track types declared
         self.user_types = {}
+
+        # Observations collected during analysis (e.g., known OUTPUT/RETURN values)
+        self.observations = []
     
     def analyze(self):
                 # Perform complete semantic analysis
@@ -130,6 +133,75 @@ class SemanticAnalyzer:
                 # Default visitor for unknown nodes
         pass
     
+    def evaluate_const(self, node):
+                # Attempt to evaluate simple constant expressions at analysis time.
+                # Returns (value, literal_type) or (None, None) if not evaluable.
+        if node is None:
+            return (None, None)
+
+        # Literal
+        if type(node).__name__ == 'Literal':
+            return (node.value, node.literal_type)
+
+        # Identifier -> check if symbol has a stored constant value
+        if type(node).__name__ == 'Identifier':
+            symbol = self.current_scope.lookup(node.name)
+            if symbol and getattr(symbol, 'value', None) is not None:
+                return (symbol.value, symbol.data_type)
+            return (None, None)
+
+        # BinaryOp: try evaluate both sides and compute
+        if type(node).__name__ == 'BinaryOp':
+            left_val, _ = self.evaluate_const(node.left)
+            right_val, _ = self.evaluate_const(node.right)
+            if left_val is None or right_val is None:
+                return (None, None)
+            op = getattr(node.operator, 'value', None)
+            try:
+                if op == '+' or op == 'PLUS':
+                    return (left_val + right_val, None)
+                if op == '-' or op == 'MINUS':
+                    return (left_val - right_val, None)
+                if op == '*' or op == 'MULTIPLY':
+                    return (left_val * right_val, None)
+                if op in ('/', 'DIVIDE'):
+                    return (left_val / right_val, None)
+                if op in ('DIV', 'DIV_INT'):
+                    return (left_val // right_val, None)
+                if op == 'MOD':
+                    return (left_val % right_val, None)
+                if op in ('=', 'EQ'):
+                    return (left_val == right_val, 'BOOLEAN')
+                if op in ('<>', 'NEQ'):
+                    return (left_val != right_val, 'BOOLEAN')
+                if op in ('<', 'LT'):
+                    return (left_val < right_val, 'BOOLEAN')
+                if op in ('>', 'GT'):
+                    return (left_val > right_val, 'BOOLEAN')
+                if op in ('<=', 'LTE'):
+                    return (left_val <= right_val, 'BOOLEAN')
+                if op in ('>=', 'GTE'):
+                    return (left_val >= right_val, 'BOOLEAN')
+            except Exception:
+                return (None, None)
+
+        # UnaryOp
+        if type(node).__name__ == 'UnaryOp':
+            val, _ = self.evaluate_const(node.operand)
+            if val is None:
+                return (None, None)
+            op = getattr(node.operator, 'value', None)
+            try:
+                if op == '-':
+                    return (-val, None)
+                if op == 'NOT':
+                    return (not val, 'BOOLEAN')
+            except Exception:
+                return (None, None)
+
+        # Built-in function calls and others are not evaluated here
+        return (None, None)
+
     # Visitor methods for each AST node type
     
     def visit_Program(self, node):
@@ -185,13 +257,19 @@ class SemanticAnalyzer:
             )
             return
         
-        # Visit the value expression
+        # Visit the value expression to determine its type
         value_type = self.visit(node.value)
         
         # Create symbol
         symbol = Symbol(node.identifier, 'constant', value_type)
         symbol.is_initialized = True
-        symbol.value = node.value
+        # Try to evaluate constant value to a primitive (if possible)
+        const_val, _ = self.evaluate_const(node.value)
+        if const_val is not None:
+            symbol.value = const_val
+        else:
+            # Fallback to storing the AST node so we might evaluate later
+            symbol.value = node.value
         
         self.current_scope.declare(symbol)
     
@@ -238,6 +316,7 @@ class SemanticAnalyzer:
                         )
                     )
             symbol.is_initialized = True
+            # Try to evaluate array element assignment - not tracked per-element currently
             return
 
         symbol = self.current_scope.lookup(node.identifier)
@@ -278,6 +357,10 @@ class SemanticAnalyzer:
         
         # Mark as initialized
         symbol.is_initialized = True
+        # Attempt to statically evaluate the assigned expression and store value for later observations
+        const_val, const_type = self.evaluate_const(node.expression)
+        if const_val is not None:
+            symbol.value = const_val
     
     def visit_TypeDeclaration(self, node):
                 # Visit type declaration
@@ -379,6 +462,17 @@ class SemanticAnalyzer:
         if node.expression:
             expr_type = self.visit(node.expression)
             
+            # If we can evaluate the return expression statically, record it
+            val, _ = self.evaluate_const(node.expression)
+            if val is not None:
+                line = getattr(node, 'line', None) or getattr(node.expression, 'line', None)
+                self.observations.append({
+                    'kind': 'return',
+                    'line': line,
+                    'value': val,
+                    'message': f"Return value: {val}",
+                })
+            
             # Check if in a function
             if self.current_function:
                 func_symbol = self.global_scope.lookup(self.current_function)
@@ -391,7 +485,7 @@ class SemanticAnalyzer:
                                 f"Return an expression of type {func_symbol.return_type}"
                             )
                         )
-    
+
     def visit_FunctionCall(self, node):
                 # Visit function call
         # Check if function is declared
@@ -679,7 +773,19 @@ class SemanticAnalyzer:
     def visit_Output(self, node):
                 # Visit output statement
         for expr in node.expressions:
+            # Visit for type checking
             self.visit(expr)
+            # Try to evaluate constant output values
+            val, _ = self.evaluate_const(expr)
+            if val is not None:
+                # Prefer expression line, then statement line
+                line = getattr(expr, 'line', None) or getattr(node, 'line', None)
+                self.observations.append({
+                    'kind': 'output',
+                    'line': line,
+                    'value': val,
+                    'message': f"Output value: {val}",
+                })
     
     def visit_Input(self, node):
                 # Visit input statement

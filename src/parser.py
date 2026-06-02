@@ -466,9 +466,12 @@ class Parser:
         return ProcedureCall(name, arguments)
     
     def return_statement(self):
+        token = self.current_token
         self.eat(TokenType.RETURN)
         expr = self.expression()
-        return ReturnStatement(expr)
+        node = ReturnStatement(expr)
+        node.line = token.line
+        return node
     
     def case_statement(self):
         self.eat(TokenType.CASE)
@@ -586,12 +589,15 @@ class Parser:
         return RepeatLoop(body, condition)
 
     def output_statement(self):
+        token = self.current_token
         self.eat(TokenType.OUTPUT)
         expressions = [self.expression()]
         while self.current_token.type == TokenType.COMMA:
             self.eat(TokenType.COMMA)
             expressions.append(self.expression())
-        return Output(expressions)
+        node = Output(expressions)
+        node.line = token.line
+        return node
 
     def input_statement(self):
         self.eat(TokenType.INPUT)
@@ -656,25 +662,38 @@ class Parser:
         token = self.current_token
         if token.type == TokenType.INTEGER:
             self.eat(TokenType.INTEGER)
-            return Literal(token.value, 'INTEGER')
+            node = Literal(token.value, 'INTEGER')
+            node.line = token.line
+            return node
         elif token.type == TokenType.REAL:
             self.eat(TokenType.REAL)
-            return Literal(token.value, 'REAL')
+            node = Literal(token.value, 'REAL')
+            node.line = token.line
+            return node
         elif token.type == TokenType.STRING:
             self.eat(TokenType.STRING)
-            return Literal(token.value, 'STRING')
+            node = Literal(token.value, 'STRING')
+            node.line = token.line
+            return node
         elif token.type == TokenType.CHAR:
             self.eat(TokenType.CHAR)
-            return Literal(token.value, 'CHAR')
+            node = Literal(token.value, 'CHAR')
+            node.line = token.line
+            return node
         elif token.type == TokenType.TRUE:
             self.eat(TokenType.TRUE)
-            return Literal(True, 'BOOLEAN')
+            node = Literal(True, 'BOOLEAN')
+            node.line = token.line
+            return node
         elif token.type == TokenType.FALSE:
             self.eat(TokenType.FALSE)
-            return Literal(False, 'BOOLEAN')
+            node = Literal(False, 'BOOLEAN')
+            node.line = token.line
+            return node
         elif token.type == TokenType.BUILTIN_FUNC:
             # Built-in function call
             func_name = token.value
+            func_line = token.line
             self.eat(TokenType.BUILTIN_FUNC)
             arguments = []
             self.eat(TokenType.LPAREN)
@@ -684,9 +703,12 @@ class Parser:
                     self.eat(TokenType.COMMA)
                     arguments.append(self.expression())
             self.eat(TokenType.RPAREN)
-            return BuiltInFunctionCall(func_name, arguments)
+            node = BuiltInFunctionCall(func_name, arguments)
+            node.line = func_line
+            return node
         elif token.type == TokenType.IDENTIFIER:
             identifier = token.value
+            id_line = token.line
             self.eat(TokenType.IDENTIFIER)
             
             # Check for record field access (e.g., Person.Name)
@@ -694,7 +716,9 @@ class Parser:
                 self.eat(TokenType.DOT)
                 field_name = self.current_token.value
                 self.eat(TokenType.IDENTIFIER)
-                return RecordFieldAccess(Identifier(identifier), field_name)
+                node = RecordFieldAccess(Identifier(identifier), field_name)
+                node.line = id_line
+                return node
             
             # Check for array access
             elif self.current_token.type == TokenType.LBRACKET:
@@ -705,7 +729,9 @@ class Parser:
                     self.eat(TokenType.COMMA)
                     indices.append(self.expression())
                 self.eat(TokenType.RBRACKET)
-                return ArrayAccess(identifier, indices)
+                node = ArrayAccess(identifier, indices)
+                node.line = id_line
+                return node
             
             # Check for function call
             elif self.current_token.type == TokenType.LPAREN:
@@ -717,10 +743,14 @@ class Parser:
                         self.eat(TokenType.COMMA)
                         arguments.append(self.expression())
                 self.eat(TokenType.RPAREN)
-                return FunctionCall(identifier, arguments)
+                node = FunctionCall(identifier, arguments)
+                node.line = id_line
+                return node
             
             else:
-                return Identifier(identifier)
+                node = Identifier(identifier)
+                node.line = id_line
+                return node
         elif token.type == TokenType.LPAREN:
             self.eat(TokenType.LPAREN)
             node = self.expression()
@@ -731,7 +761,7 @@ class Parser:
                 f"Unexpected token in expression: '{token.value}'", 
                 token.line, 
                 token.column,
-                "Expected a number, string, boolean, identifier, or '('"
+                "Expected a number, string, boolean, identifier, or '('"
             )
     
     # New parsing methods for complete 9618 support
