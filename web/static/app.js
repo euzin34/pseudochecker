@@ -153,9 +153,12 @@ async function runCheck() {
   btnCheck.textContent = "Checking…";
 
   try {
+    const idToken = window.firebaseAuth?.getIdToken ? await window.firebaseAuth.getIdToken() : null;
+    const headers = { "Content-Type": "application/json" };
+    if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
     const res = await fetch("/api/check", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ source: getSourceValue(), include_python_preview: true }),
     });
     const data = await res.json();
