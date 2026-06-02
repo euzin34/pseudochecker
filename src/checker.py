@@ -8,7 +8,7 @@ from src.tokenizer import Tokenizer
 from src.parser import Parser
 from src.semantic_analyzer import SemanticAnalyzer
 from src.transpiler import Transpiler
-from src.errors import SyntaxError, SemanticError, TypeError, WarningError, ErrorCollector
+from src.errors import SyntaxError, ErrorCollector
 from src.utils import get_file_stats
 from src import config
 
