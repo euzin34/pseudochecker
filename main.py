@@ -12,7 +12,6 @@ from src.constants import (
     ERROR_SEPARATOR,
     INFO_SEPARATOR,
     SUCCESS_MESSAGES,
-    PROGRESS_INDICATORS,
     VERSION,
 )
 
@@ -27,7 +26,9 @@ def print_header():
 
 def print_help():
     print(HELP_TEXT)
-    print("  check <file>   - Validate pseudocode (default: examples/basic_example.txt)")
+    print(
+        "  check <file>   - Validate pseudocode (default: examples/basic_example.txt)"
+    )
     print("  run <file>     - Alias for check")
     print("  python <file>  - Validate and show Python preview")
     print("  help           - Show commands")
@@ -99,7 +100,9 @@ def main():
 
             parts = user_input.split(maxsplit=1)
             command = parts[0].lower()
-            filename = parts[1].strip() if len(parts) > 1 else "examples/basic_example.txt"
+            filename = (
+                parts[1].strip() if len(parts) > 1 else "examples/basic_example.txt"
+            )
 
             if command in ("run", "check"):
                 check_file(filename)

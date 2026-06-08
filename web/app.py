@@ -19,54 +19,58 @@ except Exception:
     fb_credentials = None
 
 # Optional Sentry integration (enabled when SENTRY_DSN env var is set)
-SENTRY_DSN = os.environ.get('SENTRY_DSN')
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
 if SENTRY_DSN:
     try:
         import sentry_sdk
         from sentry_sdk.integrations.flask import FlaskIntegration
-        sentry_sdk.init(dsn=SENTRY_DSN, integrations=[FlaskIntegration()], traces_sample_rate=0.0)
-        logging.info('Sentry initialized')
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN, integrations=[FlaskIntegration()], traces_sample_rate=0.0
+        )
+        logging.info("Sentry initialized")
     except Exception:
-        logging.exception('Failed to initialize Sentry SDK')
+        logging.exception("Failed to initialize Sentry SDK")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Ensure project root is on sys.path so 'src' package can be imported when running this file directly
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.checker import PseudocodeChecker
+from src.checker import PseudocodeChecker  # noqa: E402
 
 # Application start time for uptime reporting
 APP_START_TIME = time.time()
 
 # Configure basic logging (console + file)
 try:
-    logs_dir = PROJECT_ROOT / 'logs'
+    logs_dir = PROJECT_ROOT / "logs"
     logs_dir.mkdir(exist_ok=True)
-    log_file = logs_dir / 'pseudochecker.log'
+    log_file = logs_dir / "pseudochecker.log"
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler(str(log_file), encoding='utf-8')
-        ]
+            logging.FileHandler(str(log_file), encoding="utf-8"),
+        ],
     )
 except Exception:
     logging.basicConfig(level=logging.INFO)
-    logging.exception('Failed to configure file logging; falling back to console only')
+    logging.exception("Failed to configure file logging; falling back to console only")
 
 
 def _project_id_from_service_account(path):
     try:
         import json
-        with open(path, 'r', encoding='utf-8') as fh:
+
+        with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
-            return data.get('project_id')
+            return data.get("project_id")
     except Exception:
         return None
 
 
-def init_firebase_admin():
+def init_firebase_admin_legacy():
     """Attempt to initialize firebase_admin using Application Default Credentials.
     Ensures a project ID is provided to avoid "A project ID is required" errors.
     Strategy:
@@ -94,9 +98,11 @@ def init_firebase_admin():
         try:
             opts = {}
             if project_id:
-                opts['projectId'] = project_id
+                opts["projectId"] = project_id
             firebase_admin.initialize_app(cred, opts or None)
-            logging.info(f"Firebase Admin initialized using {source} (project_id={project_id})")
+            logging.info(
+                f"Firebase Admin initialized using {source} (project_id={project_id})"
+            )
             return True
         except Exception:
             logging.exception(f"Failed to initialize Firebase Admin using {source}")
@@ -106,27 +112,36 @@ def init_firebase_admin():
     try:
         try:
             import google.auth
+
             adc_creds, adc_project = google.auth.default()
             if adc_creds:
                 # Wrap ADC in firebase credential
                 try:
                     cred = fb_credentials.ApplicationDefault()
-                    if try_initialize(cred, project_id=adc_project, source='Application Default Credentials'):
+                    if try_initialize(
+                        cred,
+                        project_id=adc_project,
+                        source="Application Default Credentials",
+                    ):
                         return True
                 except Exception:
-                    logging.exception('Failed to initialize with fb_credentials.ApplicationDefault()')
+                    logging.exception(
+                        "Failed to initialize with fb_credentials.ApplicationDefault()"
+                    )
         except Exception:
-            logging.info('google.auth.default() not available or returned no project id')
+            logging.info(
+                "google.auth.default() not available or returned no project id"
+            )
     except Exception:
-        logging.exception('Error while trying ADC')
+        logging.exception("Error while trying ADC")
 
     # 2) If explicit env var set, try it and extract project id. Also check a common keys folder on Windows (C:\keys) if env var wasn't set.
     candidate_paths = []
-    env_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+    env_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     if env_path:
         candidate_paths.append(env_path)
     # common fallback path where the key was moved earlier
-    default_key = r'C:\keys\pesudochecker-service-account.json'
+    default_key = r"C:\keys\pesudochecker-service-account.json"
     if os.path.exists(default_key):
         candidate_paths.append(default_key)
 
@@ -136,44 +151,100 @@ def init_firebase_admin():
         proj = _project_id_from_service_account(pth)
         try:
             cred = fb_credentials.Certificate(pth)
-            if try_initialize(cred, project_id=proj, source=f'GOOGLE_APPLICATION_CREDENTIALS fallback {pth}'):
+            if try_initialize(
+                cred,
+                project_id=proj,
+                source=f"GOOGLE_APPLICATION_CREDENTIALS fallback {pth}",
+            ):
                 return True
         except Exception:
-            logging.exception(f'Failed initializing from service account file {pth}')
+            logging.exception(f"Failed initializing from service account file {pth}")
 
     # 3) Fallback: search for a local service account file in repo root
     try:
-        candidates = list(Path(__file__).resolve().parent.parent.glob('*firebase*.json'))
-        candidates += list(Path(__file__).resolve().parent.parent.glob('*adminsdk*.json'))
+        candidates = list(
+            Path(__file__).resolve().parent.parent.glob("*firebase*.json")
+        )
+        candidates += list(
+            Path(__file__).resolve().parent.parent.glob("*adminsdk*.json")
+        )
         for p in candidates:
             proj = _project_id_from_service_account(str(p))
             try:
                 cred = fb_credentials.Certificate(str(p))
-                if try_initialize(cred, project_id=proj, source=f'local candidate {p.name}'):
-                    logging.warning(f'Initialized from local service account {p}; ensure it is secured')
+                if try_initialize(
+                    cred, project_id=proj, source=f"local candidate {p.name}"
+                ):
+                    logging.warning(
+                        f"Initialized from local service account {p}; ensure it is secured"
+                    )
                     return True
             except Exception:
-                logging.exception(f'Failed initializing from local candidate {p}')
+                logging.exception(f"Failed initializing from local candidate {p}")
     except Exception:
-        logging.exception('Error searching for local service account files')
+        logging.exception("Error searching for local service account files")
 
     # 4) Last resort: check GOOGLE_CLOUD_PROJECT env var and try ADC without project
-    env_proj = os.environ.get('GOOGLE_CLOUD_PROJECT')
+    env_proj = os.environ.get("GOOGLE_CLOUD_PROJECT")
     if env_proj:
         try:
             cred = fb_credentials.ApplicationDefault()
-            if try_initialize(cred, project_id=env_proj, source='ADC with GOOGLE_CLOUD_PROJECT'):
+            if try_initialize(
+                cred, project_id=env_proj, source="ADC with GOOGLE_CLOUD_PROJECT"
+            ):
                 return True
         except Exception:
-            logging.exception('Failed to initialize ADC with GOOGLE_CLOUD_PROJECT')
+            logging.exception("Failed to initialize ADC with GOOGLE_CLOUD_PROJECT")
 
-    logging.error('Could not initialize Firebase Admin SDK with a project ID')
+    logging.error("Could not initialize Firebase Admin SDK with a project ID")
     return False
+
+
+def init_firebase_admin_safe():
+    """Safer firebase_admin initializer.
+
+    Only initializes Firebase Admin when GOOGLE_APPLICATION_CREDENTIALS is explicitly
+    provided. Avoids scanning local files or using implicit fallbacks.
+    """
+    if firebase_admin is None:
+        logging.warning("firebase_admin package not available")
+        return False
+    try:
+        firebase_admin.get_app()
+        logging.info("Firebase Admin already initialized in this process")
+        return True
+    except Exception:
+        pass
+
+    env_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    if not env_path:
+        logging.info(
+            "GOOGLE_APPLICATION_CREDENTIALS not set; Firebase Admin will not be initialized"
+        )
+        return False
+    try:
+        proj = _project_id_from_service_account(env_path)
+        cred = fb_credentials.Certificate(env_path)
+        opts = {"projectId": proj} if proj else None
+        firebase_admin.initialize_app(cred, opts)
+        logging.info("Firebase Admin initialized from GOOGLE_APPLICATION_CREDENTIALS")
+        return True
+    except Exception:
+        logging.exception(
+            "Failed to initialize Firebase Admin from GOOGLE_APPLICATION_CREDENTIALS"
+        )
+        return False
+
+
+# Replace original initializer with safe one at module level
+init_firebase_admin = init_firebase_admin_safe
 
 
 def verify_firebase_id_token(req):
     """Extract Bearer token from Authorization header and verify it with Firebase Admin.
     Returns (decoded_token, None) on success or (None, (message, status_code)) on failure.
+
+    Note: error messages are intentionally generic to avoid leaking internal details.
     """
     if firebase_auth is None:
         return None, ("Firebase Admin SDK not available on server", 500)
@@ -183,13 +254,13 @@ def verify_firebase_id_token(req):
     token = auth_header.split(" ", 1)[1].strip()
     try:
         decoded = firebase_auth.verify_id_token(token)
-        # Log minimal user info for auditing (email or uid)
-        uid = decoded.get('email') or decoded.get('uid')
-        logging.info(f"Verified Firebase ID token for user: {uid}")
+        # Do NOT log user identifiers or token contents here to avoid leaking PII in logs.
         return decoded, None
-    except Exception as e:
+    except Exception:
         logging.exception("Failed to verify Firebase ID token")
-        return None, (str(e), 401)
+        # Return a generic error message to the client to avoid exposing internals
+        return None, ("Authentication failed", 401)
+
 
 EXAMPLES_DIR = PROJECT_ROOT / "examples"
 DOCS_DIR = PROJECT_ROOT / "docs"
@@ -203,22 +274,24 @@ def create_app():
     )
 
     # Initialize Firebase Admin SDK (uses Application Default Credentials / GOOGLE_APPLICATION_CREDENTIALS)
-    app.config['FIREBASE_ADMIN_INITIALIZED'] = init_firebase_admin()
+    app.config["FIREBASE_ADMIN_INITIALIZED"] = init_firebase_admin()
 
     # Health check endpoint
-    @app.route('/health')
+    @app.route("/health")
     def health():
         uptime = int(time.time() - APP_START_TIME)
-        return jsonify({
-            'status': 'ok',
-            'uptime_seconds': uptime,
-            'firebase_admin_initialized': app.config.get('FIREBASE_ADMIN_INITIALIZED', False),
-        }), 200
-
-    checker = PseudocodeChecker(
-        treat_warnings_as_failure=False,
-        include_python_preview=True,
-    )
+        return (
+            jsonify(
+                {
+                    "status": "ok",
+                    "uptime_seconds": uptime,
+                    "firebase_admin_initialized": app.config.get(
+                        "FIREBASE_ADMIN_INITIALIZED", False
+                    ),
+                }
+            ),
+            200,
+        )
 
     @app.route("/")
     def index():
@@ -235,13 +308,24 @@ def create_app():
     @app.route("/api/check", methods=["POST"])
     def api_check():
         # Require server-side Firebase Admin to be initialized for token verification
-        if not app.config.get('FIREBASE_ADMIN_INITIALIZED', False):
-            return jsonify({"ok": False, "message": "Server not configured for Firebase token verification."}), 500
+        if not app.config.get("FIREBASE_ADMIN_INITIALIZED", False):
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "message": "Server not configured for Firebase token verification.",
+                    }
+                ),
+                500,
+            )
 
         decoded, err = verify_firebase_id_token(request)
         if err:
             msg, code = err
-            return jsonify({"ok": False, "message": f"Authentication failed: {msg}"}), code
+            return (
+                jsonify({"ok": False, "message": f"Authentication failed: {msg}"}),
+                code,
+            )
 
         data = request.get_json(silent=True) or {}
         source = data.get("source", "")
@@ -279,9 +363,7 @@ def create_app():
     def api_examples_list():
         names = []
         if EXAMPLES_DIR.exists():
-            names = sorted(
-                p.stem for p in EXAMPLES_DIR.glob("*.txt")
-            )
+            names = sorted(p.stem for p in EXAMPLES_DIR.glob("*.txt"))
         return jsonify({"examples": names})
 
     @app.route("/api/examples/<name>")
@@ -291,6 +373,40 @@ def create_app():
         if not path.exists():
             return jsonify({"error": "Example not found"}), 404
         return jsonify({"name": safe_name, "source": path.read_text(encoding="utf-8")})
+
+    # Set secret key from environment if present; warn if missing in non-debug environments
+    app.secret_key = os.environ.get("SECRET_KEY", "")
+    if not app.secret_key and os.environ.get("FLASK_DEBUG", "False").lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        logging.warning(
+            "SECRET_KEY is not set. In production, set SECRET_KEY to a strong random value to protect session data."
+        )
+
+    # Strict production enforcement: set REQUIRE_SECRET_KEY=1 in production environments to make
+    # the app refuse to start when SECRET_KEY is missing. Tests and local development should
+    # not set REQUIRE_SECRET_KEY.
+    if not app.secret_key and os.environ.get("REQUIRE_SECRET_KEY", "0") == "1":
+        raise RuntimeError(
+            "SECRET_KEY is required in production. Set SECRET_KEY environment variable to a strong value and restart the application."
+        )
+
+    # Security response headers to mitigate common web risks
+    @app.after_request
+    def set_security_headers(response):
+        response.headers.setdefault(
+            "Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload"
+        )
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
+        )
+        return response
 
     return app
 

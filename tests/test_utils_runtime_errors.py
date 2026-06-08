@@ -1,11 +1,14 @@
 # Tests for utils, runtime_builtins, and error formatting
 
-import os
-import tempfile
 
 from src import utils
 from src import runtime_builtins as rb
-from src.errors import SyntaxError, SemanticError, TypeError as PTypeError, WarningError, ErrorCollector
+from src.errors import (
+    SyntaxError,
+    SemanticError,
+    WarningError,
+    ErrorCollector,
+)
 
 
 def test_utils_basic_functions(tmp_path):

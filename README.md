@@ -18,4 +18,3 @@ Quick start
 3. Install: pip install -r requirements.txt
 4. Run tests: python -m pytest -q
 5. Run web demo: python run_web.py
-

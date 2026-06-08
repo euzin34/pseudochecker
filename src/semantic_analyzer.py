@@ -425,12 +425,9 @@ class SemanticAnalyzer:
                             f"but returns {expr_type}"
                         )
                         suggestion = (
-                            "Return an expression of type "
-                            f"{func_symbol.return_type}"
+                            "Return an expression of type " f"{func_symbol.return_type}"
                         )
-                        self.errors.add_error(
-                            TypeError(msg, 1, 1, suggestion)
-                        )
+                        self.errors.add_error(TypeError(msg, 1, 1, suggestion))
 
     def visit_FunctionCall(self, node):
         # Visit function call

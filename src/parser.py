@@ -628,9 +628,7 @@ class Parser:
                     ),
                     self.current_token.line,
                     self.current_token.column,
-                    (
-                        f"Use NEXT {variable} to close the loop"
-                    ),
+                    (f"Use NEXT {variable} to close the loop"),
                 )
             self.eat(TokenType.IDENTIFIER)
 
@@ -870,9 +868,7 @@ class Parser:
                 f"but got {self.current_token.value}",
                 self.current_token.line,
                 self.current_token.column,
-                (
-                    "Use READ, WRITE, APPEND, or RANDOM after FOR"
-                ),
+                ("Use READ, WRITE, APPEND, or RANDOM after FOR"),
             )
 
         return FileOpen(filename, mode)

@@ -143,8 +143,7 @@ ERROR_MESSAGES = {
     "type_mismatch": "Type mismatch: Cannot assign {source_type} to {target_type}",
     "undefined_function": "Function '{name}' is not defined",
     "wrong_param_count": (
-        "Function '{name}' expects {expected} parameters, "
-        "but got {actual}"
+        "Function '{name}' expects {expected} parameters, " "but got {actual}"
     ),
     "missing_return": "Function '{name}' must return a value of type {type}",
     "unreachable_code": "Code after RETURN statement is unreachable",

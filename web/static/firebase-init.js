@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signO
 
 // Project Firebase configuration (moved from r.txt)
 const firebaseConfig = {
-  apiKey: "AIzaSyDv82KqtfJ3ZuHf88nmDC52HJ1mP1A0KMc",
+  apiKey: "AIzaSyDv82KqtfJ3ZuHf88nmDC52HJ1mP1A0KMc", // pragma: allowlist secret
   authDomain: "pesudochecker.firebaseapp.com",
   projectId: "pesudochecker",
   storageBucket: "pesudochecker.firebasestorage.app",
