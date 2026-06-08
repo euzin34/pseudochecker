@@ -16,7 +16,7 @@ def RIGHT(s, n):
 
 
 def MID(s, start, length):
-    return s[start - 1 : start - 1 + length]
+    return s[start - 1:start - 1 + length]
 
 
 def LCASE(c):
@@ -57,11 +57,13 @@ def CHR(n):
 
 def RAND(n):
     import random
+
     return random.randint(1, n)
 
 
 def RANDOM():
     import random
+
     return random.random()
 
 

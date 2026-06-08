@@ -15,7 +15,7 @@ from src import config
 
 @dataclass
 class CheckResult:
-        # Structured result for CLI and JSON API.
+    # Structured result for CLI and JSON API.
 
     ok: bool
     errors: List[Dict[str, Any]] = field(default_factory=list)
@@ -55,7 +55,7 @@ def _collector_to_lists(collector: ErrorCollector):
 
 
 class PseudocodeChecker:
-        # Runs tokenize -> parse -> semantic analysis on pseudocode source.
+    # Runs tokenize -> parse -> semantic analysis on pseudocode source.
 
     def __init__(
         self,
