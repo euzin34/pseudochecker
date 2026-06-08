@@ -1,5 +1,7 @@
 ﻿# Pseudocode Checker
 
+[![Codecov](https://codecov.io/gh/euzin34/pseudochecker/branch/main/graph/badge.svg)](https://codecov.io/gh/euzin34/pseudochecker)
+
 This project checks CIE 9618-style pseudocode for syntax and semantics and can produce a Python preview.
 
 Top-level layout (important):
