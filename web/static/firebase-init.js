@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signO
 
 // Project Firebase configuration (moved from r.txt)
 const firebaseConfig = {
-  apiKey: "AIzaSyDv82KqtfJ3ZuHf88nmDC52HJ1mP1A0KMc", // pragma: allowlist secret
+  apiKey: (typeof window !== 'undefined' && window.__FIREBASE_API_KEY__) ? window.__FIREBASE_API_KEY__ : (function(){ console.error('Missing FIREBASE API key. Set window.__FIREBASE_API_KEY__ at runtime (window.__FIREBASE_API_KEY__) or provide during build.'); return ''; })(),
   authDomain: "pesudochecker.firebaseapp.com",
   projectId: "pesudochecker",
   storageBucket: "pesudochecker.firebasestorage.app",
